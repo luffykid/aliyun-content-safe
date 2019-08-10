@@ -1,4 +1,4 @@
-package com.kid.aliyuncontentsafetest;
+package com.kid.aliyuncontentsafe;
 
 import java.util.UUID;
 

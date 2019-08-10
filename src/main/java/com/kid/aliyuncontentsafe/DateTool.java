@@ -1,9 +1,7 @@
-package com.kid.aliyuncontentsafetest;
-import org.junit.Test;
+package com.kid.aliyuncontentsafe;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -77,11 +75,4 @@ public class DateTool {
         rfc1036Format.setTimeZone(GMT_ZONE);
         asctimeFormat.setTimeZone(GMT_ZONE);
     }
-
-    @Test
-    public void test() {
-        System.out.println(rfc1123Format.format(new Date()));
-    }
-
-
 }
