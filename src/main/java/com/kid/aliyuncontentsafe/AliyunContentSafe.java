@@ -242,4 +242,23 @@ public class AliyunContentSafe {
         }
         return "";
     }
+
+    public String asynScanAdVideo(List<ScanMedia> videosTobeScanned) {
+        try {
+            String asynScanPornVideoFunction = "/green/video/asyncscan";
+            Map<String, Object> body = new HashMap<>();
+            String[] scenes = new String[]{"ad"};
+            body.put("scenes", scenes);
+            body.put("tasks", videosTobeScanned);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, asynScanPornVideoFunction);
+            String requestUri = baseUri + asynScanPornVideoFunction;
+            HttpEntity<String> response = client.postForEntity(requestUri,
+                    httpEntity,
+                    String.class);
+            return response.getBody();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 }
