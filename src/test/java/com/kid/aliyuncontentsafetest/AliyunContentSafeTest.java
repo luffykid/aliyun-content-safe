@@ -119,6 +119,16 @@ public class AliyunContentSafeTest {
         System.out.println(scanResults);
     }
 
+    @Test
+    public void testScanLiveImage() {
+        AliyunContentSafe aliyunContentSafe = new AliyunContentSafe();
+        String imageUrl = "http://139.219.13.249/vimg/icon/market/efe127fa-au=3798078917,1929861432&fm=15&gp=0.jpg";
+        String result = aliyunContentSafe.scanLiveImage(Arrays.asList(ScanMedia.newInstance(imageUrl)));
+        Assert.assertEquals("200", JsonPath.read(result, "$.code").toString());
+        Assert.assertEquals("normal", JsonPath.read(result,"$.data[0].results[0].label"));
+        System.out.println(result);
+    }
+
     private String convertToTaskIdsJson(String asynScanPornVideoResponse) {
         Integer taskIdsSize = JsonPath.read(asynScanPornVideoResponse, "$.data.length()");
         List<String> taskIds = new ArrayList<>();
