@@ -299,4 +299,23 @@ public class AliyunContentSafe {
         }
         return "";
     }
+
+    public String scanLogoImage(List<ScanMedia> imagesTobeScanned) {
+        try {
+            String scanPornImageFunction = "/green/image/scan";
+            Map<String, Object> body = new HashMap<>();
+            String[] scenes = new String[]{"logo"};
+            body.put("scenes", scenes);
+            body.put("tasks", imagesTobeScanned);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, scanPornImageFunction);
+            String requestUri = baseUri + scanPornImageFunction;
+            HttpEntity<String> response = client.postForEntity(requestUri,
+                    httpEntity,
+                    String.class);
+            return response.getBody();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 }
