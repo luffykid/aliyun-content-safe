@@ -138,7 +138,7 @@ public class AliyunContentSafe {
     }
 
 
-    public String getAsynScanPornVideoResults(String taskIdsJson) {
+    public String getAsynScanVideoResults(String taskIdsJson) {
         String getAsynScanPornVideoResultsFunction = "/green/video/results";
         HttpEntity<String> httpEntity = buildHttpEntity(taskIdsJson, getAsynScanPornVideoResultsFunction);
         String requestUri = baseUri + getAsynScanPornVideoResultsFunction;
@@ -157,6 +157,25 @@ public class AliyunContentSafe {
             body.put("tasks", imagesTobeScanned);
             HttpEntity<String> httpEntity = buildHttpEntity(body, scanPornImageFunction);
             String requestUri = baseUri + scanPornImageFunction;
+            HttpEntity<String> response = client.postForEntity(requestUri,
+                    httpEntity,
+                    String.class);
+            return response.getBody();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public String asynScanTerrorismVideo(List<ScanMedia> videosTobeScanned) {
+        try {
+            String asynScanPornVideoFunction = "/green/video/asyncscan";
+            Map<String, Object> body = new HashMap<>();
+            String[] scenes = new String[]{"terrorism"};
+            body.put("scenes", scenes);
+            body.put("tasks", videosTobeScanned);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, asynScanPornVideoFunction);
+            String requestUri = baseUri + asynScanPornVideoFunction;
             HttpEntity<String> response = client.postForEntity(requestUri,
                     httpEntity,
                     String.class);

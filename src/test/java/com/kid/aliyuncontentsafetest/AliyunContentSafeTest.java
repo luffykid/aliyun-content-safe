@@ -35,7 +35,7 @@ public class AliyunContentSafeTest {
         String taskIds = convertToTaskIdsJson(result);
         System.out.println(taskIds);
         String scanResults = aliyunContentSafe
-                                .getAsynScanPornVideoResults(taskIds);
+                                .getAsynScanVideoResults(taskIds);
         System.out.println(scanResults);
 
     }
@@ -50,6 +50,21 @@ public class AliyunContentSafeTest {
         System.out.println(result);
     }
 
+    @Test
+    public void testScanTerrorismVideo() throws InterruptedException {
+        AliyunContentSafe aliyunContentSafe = new AliyunContentSafe();
+        String videoUri = "http://139.219.13.249/vimg/icon/market/efe127fa-au=3798078917,1929861432&fm=15&gp=0.jpg";
+        String result = aliyunContentSafe.asynScanTerrorismVideo(Arrays.asList(ScanMedia.newInstance(videoUri)));
+        Assert.assertEquals("200", JsonPath.read(result, "$.code").toString());
+        System.out.println(result);
+        Assert.assertEquals("1", JsonPath.read(result, "$.data.length()").toString());
+        Thread.sleep(30000);
+        String taskIds = convertToTaskIdsJson(result);
+        System.out.println(taskIds);
+        String scanResults = aliyunContentSafe
+                .getAsynScanVideoResults(taskIds);
+        System.out.println(scanResults);
+    }
 
     private String convertToTaskIdsJson(String asynScanPornVideoResponse) {
         Integer taskIdsSize = JsonPath.read(asynScanPornVideoResponse, "$.data.length()");
