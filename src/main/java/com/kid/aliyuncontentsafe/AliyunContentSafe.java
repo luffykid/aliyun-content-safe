@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class AliyunContentSafe {
@@ -20,13 +21,18 @@ public class AliyunContentSafe {
     private String accessKeySecret = "PsKmp1FlpgVpIlMomt2vE1Bi7aSBsG";
     private String accessKeyId = "LTAIGhzoQKSH1gGv";
     private RestTemplate client = new RestTemplate();
+    private SimpleDateFormat rfc1036Format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 
 
-    private HttpEntity<String> buildHttpEntity(Map<String, Object> body) throws JsonProcessingException {
+    private HttpEntity<String> buildHttpEntity(Map<String, Object> body, String function) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         String jsonBody = mapper.writeValueAsString(body);
+        return buildHttpEntity(jsonBody, function);
+    }
+
+    private HttpEntity<String> buildHttpEntity(String jsonBody, String function) {
         HttpHeaders headers = buildHttpHeaders(jsonBody);
-        String signature = generateSignature(headers);
+        String signature = generateSignature(headers, function);
         System.out.println(signature);
         headers.set("Authorization", "acs " + this.accessKeyId + ":" + signature);
         HttpEntity<String> httpEntity = new HttpEntity<>(jsonBody, headers);
@@ -41,7 +47,7 @@ public class AliyunContentSafe {
         headers.set("x-acs-signature-version", "1.0");
         headers.set("x-acs-signature-method", "HMAC-SHA1");
         headers.set("x-acs-signature-nonce", UUID.randomUUID().toString());
-        headers.set("Date", DateTool.rfc1036Format.format(new Date()));
+        headers.set("Date", rfc1036Format.format(new Date()));
         String contentMd5 = generateContentMd5(jsonBody);
         headers.set("Content-MD5", contentMd5);
         return headers;
@@ -61,8 +67,8 @@ public class AliyunContentSafe {
         return jsonBodyMd5DigestedAndBase64Encoded;
     }
 
-    private String generateSignature(HttpHeaders headers) {
-        String strToBeSigned = convertToStringToBeSigned(headers);
+    private String generateSignature(HttpHeaders headers, String function) {
+        String strToBeSigned = convertToStringToBeSigned(headers, function);
         SecretKeySpec keySpec = new SecretKeySpec(this.accessKeySecret.getBytes(), "HmacSHA1");
         try {
             Mac hMacSha1 = Mac.getInstance("HmacSHA1");
@@ -77,7 +83,7 @@ public class AliyunContentSafe {
         return null;
     }
 
-    private String convertToStringToBeSigned(HttpHeaders headers) {
+    private String convertToStringToBeSigned(HttpHeaders headers, String function) {
         StringBuilder sb = new StringBuilder();
         sb.append("POST\n");
         sb.append(headers.get("Accept").get(0) + "\n");
@@ -88,7 +94,7 @@ public class AliyunContentSafe {
         sb.append("x-acs-signature-nonce:" + headers.get("x-acs-signature-nonce").get(0) + "\n");
         sb.append("x-acs-signature-version:" + headers.get("x-acs-signature-version").get(0) + "\n");
         sb.append("x-acs-version:" + headers.get("x-acs-version").get(0)+"\n");
-        sb.append(this.function);
+        sb.append(function);
         System.out.println(sb.toString());
         return sb.toString();
     }
@@ -100,7 +106,56 @@ public class AliyunContentSafe {
             String[] scenes = new String[]{"porn"};
             body.put("scenes", scenes);
             body.put("tasks", imagesTobeScanned);
-            HttpEntity<String> httpEntity = buildHttpEntity(body);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, scanPornImageFunction);
+            String requestUri = baseUri + scanPornImageFunction;
+            HttpEntity<String> response = client.postForEntity(requestUri,
+                    httpEntity,
+                    String.class);
+            return response.getBody();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public String asynScanPornVideo(List<ScanMedia> videosTobeScanned) {
+        try {
+            String asynScanPornVideoFunction = "/green/video/asyncscan";
+            Map<String, Object> body = new HashMap<>();
+            String[] scenes = new String[]{"porn"};
+            body.put("scenes", scenes);
+            body.put("tasks", videosTobeScanned);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, asynScanPornVideoFunction);
+            String requestUri = baseUri + asynScanPornVideoFunction;
+            HttpEntity<String> response = client.postForEntity(requestUri,
+                    httpEntity,
+                    String.class);
+            return response.getBody();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    public String getAsynScanPornVideoResults(String taskIdsJson) {
+        String getAsynScanPornVideoResultsFunction = "/green/video/results";
+        HttpEntity<String> httpEntity = buildHttpEntity(taskIdsJson, getAsynScanPornVideoResultsFunction);
+        String requestUri = baseUri + getAsynScanPornVideoResultsFunction;
+        HttpEntity<String> response = client.postForEntity(requestUri,
+                httpEntity,
+                String.class);
+        return response.getBody();
+    }
+
+    public String scanTerrorismImage(List<ScanMedia> imagesTobeScanned) {
+        try {
+            String scanPornImageFunction = "/green/image/scan";
+            Map<String, Object> body = new HashMap<>();
+            String[] scenes = new String[]{"terrorism"};
+            body.put("scenes", scenes);
+            body.put("tasks", imagesTobeScanned);
+            HttpEntity<String> httpEntity = buildHttpEntity(body, scanPornImageFunction);
             String requestUri = baseUri + scanPornImageFunction;
             HttpEntity<String> response = client.postForEntity(requestUri,
                     httpEntity,
